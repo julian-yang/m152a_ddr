@@ -38,6 +38,7 @@ wire fourHz; //4Hz
 wire display;
 wire combo_en;
 wire [13:0] score;
+wire [13:0] comboCount;
 
 
 
@@ -46,7 +47,7 @@ wire [STATE_BITS:0] state;
 clock clkModule ( .clk(clk), .state(state), .twoHz_CLK(twoHz), .oneHz_CLK(oneHz), .fourHz_CLK(fourHz), .display_CLK(display));
 stateGenerator stateModule (.output_state(state), .display_combo_en(combo_en), .clk(clk), .pauseSwitch(sw[0]), .btnR(btnR), .btnL(btnL));
 //score scoreModule (.clk(clk), .oneHz_CLK(oneHz), .twoHz_CLK(twoHz), .blink_CLK(blink), .state(state), .num0(num0), .num1(num1), .num2(num2), .num3(num3), .isBlink(isBlink));
-//display displayModule (.seg(seg), .an(an), .clk(display), .num0(num0), .num1(num1), .num2(num2), .num3(num3), .blink_CLK(blink), .isBlink(isBlink));
+//display displayModule (.seg(seg), .an(an), .clk(display), .state(state), .next_arrow(arrow), .comboCount(comboCount), .combo_enable(combo_en));
 
 assign led[7] = oneHz;
 assign led[6] = twoHz;

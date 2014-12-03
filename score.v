@@ -4,7 +4,7 @@ module score(
     // inputs
     clk, correctHit, incorrectHit, state,
     // outputs
-    score);
+    score, comboCount);
 `include "ddr_definitions.v"
 
 input clk;
@@ -17,7 +17,7 @@ output [13:0] score;
 
 reg [13:0] score_reg = 0;
 reg [3:0] multiplier = 1;
-reg [4:0] combos = 0;
+reg [13:0] combos = 0;
 
 reg [3:0] reg_num0;
 reg [3:0] reg_num1;
@@ -61,6 +61,7 @@ always @(posedge clk) begin
 end
 
 assign score = score_reg;
+assign comboCount = combos;
 
 endmodule
 
