@@ -30,12 +30,12 @@ module random(
 
 input clk;
 input [5:0] sw;
-output [5:0] random_num [3:0];
-output [3:0] random_arrow [3:0];
+output [5:0] random_num;
+output [NUM_ARROWS_BITS:0] random_arrow;
 
 reg [5:0] random_reg = sw;
-reg [5:0] random_num_array;
-reg [3:0] random_arrow_array [3:0];
+//reg [5:0] random_num_array;
+//reg [3:0] random_arrow_array [3:0];
 
 always @ (posedge clk)
 begin
@@ -44,14 +44,14 @@ begin
     random_reg = {6{newbit, random_reg[5:1]}};
 
     //shift over new number in our number trackers
-    random_num_array[2:0] = random_num_array[3:1];
-    random_num_array[3] = random_reg; 
+    //random_num_array[2:0] = random_num_array[3:1];
+    //random_num_array[3] = random_reg; 
 
-    random_arrow_array[2:0] = random_arrow_array[3:1];
-    random_arrow_array[3] = random_reg % NUM_ARROWS;
+    //random_arrow_array[2:0] = random_arrow_array[3:1];
+    //random_arrow_array[3] = random_reg % NUM_ARROWS;
 end
 
-assign random_num = random_num_array;
-assign random_arrow = random_arrow_array;
+assign random_num = random_num;
+assign random_arrow = random_num % NUM_ARROWS;
 
 endmodule

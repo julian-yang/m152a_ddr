@@ -26,6 +26,7 @@ parameter STATE_BITS = 1;
 
 // arrows (there are 11)
 parameter NUM_ARROWS = 11;
+parameter NUM_ARROWS_BITS = 3;
 parameter ARROW_UP = 0;
 parameter ARROW_DOWN = 1;
 parameter ARROW_LEFT = 2;

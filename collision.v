@@ -24,6 +24,8 @@ module collision(
         // output
         correctHit, incorrectHit);
 
+`include "ddr_definitions.v"
+
 input clk;
 input metronome_clk;
 input btnU;
@@ -31,11 +33,11 @@ input btnD;
 input btnL;
 input btnR;
 
-input [3:0] arrow;
+input [NUM_ARROWS_BITS:0] arrow;
 output correctHit;
 output incorrectHit;
 
-`include "ddr_definitions.v"
+
 
 //set up async presses
 
@@ -164,22 +166,6 @@ always @(posedge clk) begin
         end
         else if(keyPressed != ARROW_NONE) begin
             case(arrow) begin
-                //ARROW_UP: begin
-                //    if(keysPressed == ARROW_UP)
-                //        correctHit_reg = 1;
-                //end
-                //ARROW_DOWN: begin
-                //    if(keysPressed == ARROW_DOWN) 
-                //        correctHit_reg = 1;
-                //end
-                //ARROW_LEFT: begin
-                //    if(keysPressed == ARROW_LEFT) 
-                //        correctHit_reg = 1;
-                //end
-                //ARROW_RIGHT: begin
-                //    if(keysPressed == ARROW_RIGHT) 
-                //        correctHit_reg = 1;
-                //end
                 ARROW_UP_DOWN: begin
                     if(keysPressed == ARROW_UP || keysPressed == ARROW_DOWN) 
                         hasPressedPartialArrow = 1;
