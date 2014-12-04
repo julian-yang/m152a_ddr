@@ -25,21 +25,33 @@ module random(
     random_num,
     random_arrow
     );
+//note feed in the metronome clk here.
+`include "ddr_definitions.v"
 
 input clk;
 input [5:0] sw;
-output [5:0] random_num;
-output [4:0] random_arrow;
+output [5:0] random_num [3:0];
+output [3:0] random_arrow [3:0];
 
 reg [5:0] random_reg = sw;
+reg [5:0] random_num_array;
+reg [3:0] random_arrow_array [3:0];
 
 always @ (posedge clk)
 begin
-    newBit = random_num[5] + random_num[1] + 1;
-    random_num_reg = {6{newBit,random_num}};
+    //generate new number
+    newBit = random_num[5] + random_reg[1] + 1;
+    random_reg = {6{newbit, random_reg[5:1]}};
+
+    //shift over new number in our number trackers
+    random_num_array[2:0] = random_num_array[3:1];
+    random_num_array[3] = random_reg; 
+
+    random_arrow_array[2:0] = random_arrow_array[3:1];
+    random_arrow_array[3] = random_reg % NUM_ARROWS;
 end
 
-assign random_num = random_num_reg;
-assign random_arrow = random_num_reg % 10;
+assign random_num = random_num_array;
+assign random_arrow = random_arrow_array;
 
 endmodule
