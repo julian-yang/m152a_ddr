@@ -24,7 +24,8 @@ parameter STATE_PAUSE = 1;
 parameter STATE_RESET = 2;
 parameter STATE_BITS = 1;
 
-// arrows
+// arrows (there are 11)
+parameter NUM_ARROWS = 11;
 parameter ARROW_UP = 0;
 parameter ARROW_DOWN = 1;
 parameter ARROW_LEFT = 2;
@@ -35,6 +36,7 @@ parameter ARROW_UP_RIGHT = 6;
 parameter ARROW_DOWN_LEFT = 7;
 parameter ARROW_DOWN_RIGHT = 8;
 parameter ARROW_LEFT_RIGHT = 9;
+parameter ARROW_NONE = 10;
 
 // arrows to be displayed
 parameter SEG_ARROW_UP = 7'b0000001;
