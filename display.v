@@ -1,48 +1,68 @@
 `timescale 1ns / 1ps
-`include "ddr_definitions.v"
-module display(
+
+module display
+#(`include "ddr_definitions.v")
+(
 	// outputs
-	seg, an,
+	seg, an, cur_arrow,
 	// inputs
-	clk, state, next_arrow, score, comboCount, combo_enable /*todo find right var name */ );
+	clk, metronome_clk, state, next_arrow, score, comboCount, combo_enable);
 	
 input clk;
+input metronome_clk;
 input [STATE_BITS:0] state;
-input [4:0] next_arrow;
+input [NUM_ARROWS_BITS:0] next_arrow;
 input [13:0] score;
 input [13:0] comboCount;
 input combo_enable;
-reg [3:0] num0;
-reg [3:0] num1;
-reg [3:0] num2;
-reg [3:0] num3;
+reg [NUM_ARROWS_BITS:0] num0;
+reg [NUM_ARROWS_BITS:0] num1;
+reg [NUM_ARROWS_BITS:0] num2;
+reg [NUM_ARROWS_BITS:0] num3;
 
 output [6:0] seg;
 output [3:0] an;
+output [NUM_ARROWS_BITS:0] cur_arrow;
 
 reg [1:0] numTracker; //keep track of what number we're displaying.
-reg [3:0] numToDisplay; //copy the digit value to display in here.
+reg [NUM_ARROWS_BITS:0] numToDisplay; //copy the digit value to display in here.
 reg [3:0] anToDisplay;
 reg [6:0] segToDisplay;
 
-reg [6:0] arrow0;
-reg [6:0] arrow1;
-reg [6:0] arrow2; //store the previous 3 arrows.
+reg [NUM_ARROWS_BITS:0] arrow3 = ARROW_NONE;
+reg [NUM_ARROWS_BITS:0] arrow1 = ARROW_NONE;
+reg [NUM_ARROWS_BITS:0] arrow2 = ARROW_NONE; //store the previous 3 arrows.
+
+// =====================
+// Posedge Metronome_clk
+// =====================
+reg [2:0] posedge_metronome_clk = 0;
+reg is_posedge_metronome_clk = 0;
+    
+always @ (posedge clk) begin
+    posedge_metronome_clk = {metronome_clk, posedge_metronome_clk[2:1]};
+    
+    is_posedge_metronome_clk = ~posedge_metronome_clk[0] & posedge_metronome_clk[1];
+end
+// end posedge detection
+
 
 always @(posedge clk) begin
     case(state)
-        STATE_GAME:
-        begin
-           	// assign arrows to num's
-           	num3 = next_arrow;
-           	num2 = arrow2;
-           	num1 = arrow1;
-           	num0 = arrow0;
+        STATE_GAME: begin
+            if(is_posedge_metronome_clk) begin
+                // assign arrows to num's
+                
+                num3 = arrow3; //this is the one that the user should be pressing
+                num2 = arrow2;
+                num1 = arrow1;
+                num0 = next_arrow;
 
-           	// store previous arrows
-           	arrow0 = arrow1;
-           	arrow1 = arrow2;
-           	arrow2 = next_arrow;
+                // store previous arrows
+                arrow3 = num2;
+                arrow2 = num1;
+                arrow1 = num0;
+            end
         end
         STATE_PAUSE:
         begin
@@ -72,7 +92,6 @@ always @(posedge clk) begin
 		0: begin
 			anToDisplay = 4'b0111;
 			numToDisplay = num0;
-            
 		end
 		1: begin
 			anToDisplay = 4'b1011;
@@ -88,8 +107,34 @@ always @(posedge clk) begin
 		end
 	endcase
     
+    case(numToDisplay)
+        0: segToDisplay = SEG_ZERO;
+        1: segToDisplay = SEG_ONE;
+        2: segToDisplay = SEG_TWO;
+        3: segToDisplay = SEG_THREE;
+        4: segToDisplay = SEG_FOUR;
+        5: segToDisplay = SEG_FIVE;
+        6: segToDisplay = SEG_SIX;
+        7: segToDisplay = SEG_SEVEN;
+        8: segToDisplay = SEG_EIGHT;
+        9: segToDisplay = SEG_NINE;
+        10: segToDisplay = SEG_ARROW_UP;
+        11: segToDisplay = SEG_ARROW_DOWN;
+        12: segToDisplay = SEG_ARROW_LEFT;
+        13: segToDisplay = SEG_ARROW_RIGHT;
+        14: segToDisplay = SEG_ARROW_UP_DOWN;
+        15: segToDisplay = SEG_ARROW_UP_LEFT;
+        16: segToDisplay = SEG_ARROW_UP_RIGHT;
+        17: segToDisplay = SEG_ARROW_DOWN_LEFT;
+        18: segToDisplay = SEG_ARROW_DOWN_RIGHT;
+        19: segToDisplay = SEG_ARROW_LEFT_RIGHT;
+        20: segToDisplay = SEG_ARROW_NONE;
+    endcase
 end
 
+
+
+assign cur_arrow = arrow3;
 assign seg = segToDisplay;
 assign an = anToDisplay;
 	

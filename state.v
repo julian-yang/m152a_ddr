@@ -1,4 +1,6 @@
-module stateGenerator (
+module stateGenerator 
+#(`include "ddr_definitions.v")
+(
 	// Outputs
 	output_state, display_combo_en,
 	// Inputs
@@ -14,9 +16,8 @@ input pauseSwitch; //pause
 
 input clk;
 
-`include "ddr_definitions.v"
 
-reg [STATE_BITS:0] state = 2'b00;
+reg [STATE_BITS:0] state = STATE_RESET;
 reg is_paused = 0;
 reg display_combo_reg = 0;
 // ===============

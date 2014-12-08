@@ -18,40 +18,49 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module random(
+module random
+#(`include "ddr_definitions.v")
+(
     //input 
-    clk, sw,
+    clk, sw, state,
     //output
     random_num,
     random_arrow
     );
 //note feed in the metronome clk here.
-`include "ddr_definitions.v"
+
 
 input clk;
-input [5:0] sw;
-output [5:0] random_num;
+input [STATE_BITS:0] state;
+input [RANDOM_BITS:0] sw;
+output [RANDOM_BITS:0] random_num;
 output [NUM_ARROWS_BITS:0] random_arrow;
 
-reg [5:0] random_reg = sw;
+reg [RANDOM_BITS:0] random_reg;
+reg newBit;
 //reg [5:0] random_num_array;
 //reg [3:0] random_arrow_array [3:0];
 
 always @ (posedge clk)
 begin
-    //generate new number
-    newBit = random_num[5] + random_reg[1] + 1;
-    random_reg = {6{newbit, random_reg[5:1]}};
+    if(state == STATE_RESET)
+        random_reg <= 1523;
+    else begin
+        //generate new number
+        newBit <= random_num[RANDOM_BITS] + random_reg[1] + 1;
+        random_reg <= {newBit, random_reg[RANDOM_BITS:1]};
 
-    //shift over new number in our number trackers
-    //random_num_array[2:0] = random_num_array[3:1];
-    //random_num_array[3] = random_reg; 
+        //shift over new number in our number trackers
+        //random_num_array[2:0] = random_num_array[3:1];
+        //random_num_array[3] = random_reg; 
 
-    //random_arrow_array[2:0] = random_arrow_array[3:1];
-    //random_arrow_array[3] = random_reg % NUM_ARROWS;
+        //random_arrow_array[2:0] = random_arrow_array[3:1];
+        //random_arrow_array[3] = random_reg % NUM_ARROWS;
+    end
 end
 
-assign random_num = random_num;
-assign random_arrow = random_num % NUM_ARROWS;
+
+assign random_num = random_reg;
+assign random_arrow = (random_reg % 5) + 10;
 
 endmodule

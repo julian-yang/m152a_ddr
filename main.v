@@ -18,16 +18,21 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module main( // inputs 
-						clk, btnR, btnL, sw, 
+module main
+#(`include "ddr_definitions.v")
+( 
+                        // inputs 
+						clk, btnU, btnD, btnL, btnR, sw, 
 						// outputs
 						led, seg, an
     );
-`include "ddr_definitions.v"
+
 input clk;
-input btnR;
+input btnU;
+input btnD;
 input btnL;
-input [1:0] sw;
+input btnR;
+input [7:0] sw;
 output [7:0] led;
 output [6:0] seg;
 output [3:0] an;
@@ -40,27 +45,35 @@ wire combo_en;
 wire [13:0] score;
 wire [13:0] comboCount;
 
-
-
+wire [RANDOM_BITS:0] randomNum;
+wire [NUM_ARROWS_BITS:0] randomArrow;
 wire [STATE_BITS:0] state;
+wire [NUM_ARROWS_BITS:0] curArrow;
+wire correctHit;
+wire incorrectHit;
 
 clock clkModule ( .clk(clk), .state(state), .twoHz_CLK(twoHz), .oneHz_CLK(oneHz), .fourHz_CLK(fourHz), .display_CLK(display));
 stateGenerator stateModule (.output_state(state), .display_combo_en(combo_en), .clk(clk), .pauseSwitch(sw[0]), .btnR(btnR), .btnL(btnL));
+random randomModule(.clk(oneHz), .sw(sw[7:1]), .random_num(randomNum), .random_arrow(randomArrow), .state(state));
 //score scoreModule (.clk(clk), .oneHz_CLK(oneHz), .twoHz_CLK(twoHz), .blink_CLK(blink), .state(state), .num0(num0), .num1(num1), .num2(num2), .num3(num3), .isBlink(isBlink));
-//display displayModule (.seg(seg), .an(an), .clk(display), .state(state), .next_arrow(arrow), .comboCount(comboCount), .combo_enable(combo_en));
+display displayModule (.seg(seg), .an(an), .clk(display), .metronome_clk(oneHz), .state(state), .next_arrow(randomArrow), .comboCount(comboCount), .combo_enable(combo_en), .score(score), .cur_arrow(curArrow));
+collision collisionModule(.clk(clk), .metronome_clk(twoHz), .btnU(btnU), .btnD(btnD), .btnL(btnL), .btnR(btnR), .arrow(curArrow), .correctHit(correctHit), .incorrectHit(incorrectHit));
+//assign randomArrow = 15;
+assign score = randomNum;
+assign comboCount = 24;
 
-assign led[7] = oneHz;
-assign led[6] = twoHz;
-assign led[5] = fourHz;
-assign led[4] = combo_en;
-assign led[3] = display;
-assign led[2] = 0;
+assign led[7] = 0;
+assign led[6] = 0;
+assign led[5] = 0;
+assign led[4] = 0;
+assign led[3] = correctHit;
+assign led[2] = incorrectHit;
 assign led[1] = state[1];
 assign led[0] = state[0];
 
 
-assign an = 4'b0000;
-assign seg[6:0] = 7'b1000000;
+//assign an = 4'b0000;
+//assign seg[6:0] = 7'b1000000;
 
 
 endmodule

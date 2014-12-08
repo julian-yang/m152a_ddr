@@ -18,7 +18,9 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module clock (  // Input
+module clock 
+#(`include "ddr_definitions.v")
+(  // Input
                     clk, state,
 					 // Output
                     twoHz_CLK,
@@ -34,7 +36,7 @@ output twoHz_CLK;
 output fourHz_CLK;
 output display_CLK;
 
-`include "ddr_definitions.v"
+
 
 //reg clk; // 128Hz clk
 // clk is 100,000,000Hz
@@ -77,7 +79,7 @@ always @ (posedge clk)
 			fourHz_en <= 0;
 				
         end
-    else if(state == STATE_GAME)
+    else //if(state == STATE_GAME)
 		begin
 			// do divider for 128hz
 			if(display_dv == 390625) //390625
@@ -95,13 +97,13 @@ always @ (posedge clk)
 			if(display_en)
 				begin
 					oneHz_dv <= oneHz_counter[7:0];
-					oneHz_en <= oneHz_counter[8]; // Count to 128
+					oneHz_en <= ~oneHz_counter[8]; // Count to 128
 					
 					twoHz_dv <= twoHz_counter[6:0];
-					twoHz_en <= twoHz_counter[7];
+					twoHz_en <= ~twoHz_counter[7];
 					
 					fourHz_dv <= fourHz_counter[5:0]; 
-					fourHz_en <= fourHz_counter[6];
+					fourHz_en <= ~fourHz_counter[6];
 				end
 		end
 	
