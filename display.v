@@ -4,14 +4,14 @@ module display
 #(`include "ddr_definitions.v")
 (
 	// outputs
-	seg, an, cur_arrow,
+	seg, an,
 	// inputs
-	clk, metronome_clk, state, next_arrow, score, comboCount, combo_enable);
+	clk, metronome_clk, state, cur_arrows, score, comboCount, combo_enable);
 	
 input clk;
 input metronome_clk;
 input [STATE_BITS:0] state;
-input [NUM_ARROWS_BITS:0] next_arrow;
+input [NUM_ARROWS_BITS:0] cur_arrows [3:0];
 input [13:0] score;
 input [13:0] comboCount;
 input combo_enable;
@@ -22,16 +22,11 @@ reg [NUM_ARROWS_BITS:0] num3;
 
 output [6:0] seg;
 output [3:0] an;
-output [NUM_ARROWS_BITS:0] cur_arrow;
 
 reg [1:0] numTracker; //keep track of what number we're displaying.
 reg [NUM_ARROWS_BITS:0] numToDisplay; //copy the digit value to display in here.
 reg [3:0] anToDisplay;
 reg [6:0] segToDisplay;
-
-reg [NUM_ARROWS_BITS:0] arrow3 = ARROW_NONE;
-reg [NUM_ARROWS_BITS:0] arrow1 = ARROW_NONE;
-reg [NUM_ARROWS_BITS:0] arrow2 = ARROW_NONE; //store the previous 3 arrows.
 
 // =====================
 // Posedge Metronome_clk
@@ -53,15 +48,10 @@ always @(posedge clk) begin
             if(is_posedge_metronome_clk) begin
                 // assign arrows to num's
                 
-                num3 = arrow3; //this is the one that the user should be pressing
-                num2 = arrow2;
-                num1 = arrow1;
-                num0 = next_arrow;
-
-                // store previous arrows
-                arrow3 = num2;
-                arrow2 = num1;
-                arrow1 = num0;
+                num3 = cur_arrows[3]; //this is the one that the user should be pressing
+                num2 = cur_arrows[2];
+                num1 = cur_arrows[1];
+                num0 = cur_arrows[0];
             end
         end
         STATE_PAUSE:
@@ -134,7 +124,6 @@ end
 
 
 
-assign cur_arrow = arrow3;
 assign seg = segToDisplay;
 assign an = anToDisplay;
 	
