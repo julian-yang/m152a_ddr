@@ -35,14 +35,13 @@ parameter ARROW_UP = 10,
 parameter ARROW_DOWN = 11,
 parameter ARROW_LEFT = 12,
 parameter ARROW_RIGHT = 13,
-parameter ARROW_NONE = 14,
-parameter ARROW_UP_DOWN = 20,
+parameter ARROW_UP_DOWN = 14,
 parameter ARROW_UP_LEFT = 15,
 parameter ARROW_UP_RIGHT = 16,
 parameter ARROW_DOWN_LEFT = 17,
 parameter ARROW_DOWN_RIGHT = 18,
 parameter ARROW_LEFT_RIGHT = 19,
-
+parameter ARROW_NONE = 20,
 
 
 

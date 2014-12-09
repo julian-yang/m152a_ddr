@@ -44,23 +44,16 @@ reg newBit;
 always @ (posedge clk)
 begin
     if(state == STATE_RESET)
-        random_reg <= 1523;
+        random_reg <= sw;
     else begin
         //generate new number
         newBit <= random_num[RANDOM_BITS] + random_reg[RANDOM_BITS-1] + 1;
         random_reg <= {newBit, random_reg[RANDOM_BITS:1]};
-
-        //shift over new number in our number trackers
-        //random_num_array[2:0] = random_num_array[3:1];
-        //random_num_array[3] = random_reg; 
-
-        //random_arrow_array[2:0] = random_arrow_array[3:1];
-        //random_arrow_array[3] = random_reg % NUM_ARROWS;
     end
 end
 
 
 assign random_num = random_reg;
-assign random_arrow = (random_reg % 5) + 10;
+assign random_arrow = (random_reg % NUM_ARROWS) + 10;
 
 endmodule

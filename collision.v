@@ -22,9 +22,9 @@ module collision
 #(`include "ddr_definitions.v")
 (
 	// input
-	clk, metronome_clk, btnU, btnD, btnL, btnR, arrow,
+	clk, metronome_clk, btnU, btnD, btnL, btnR, arrow, state,
 	// output
-	correctHit, incorrectHit
+	correctHit, incorrectHit, partialArrow
 );
 
 
@@ -35,11 +35,11 @@ input btnU;
 input btnD;
 input btnL;
 input btnR;
-
+input [STATE_BITS:0] state;
 input [NUM_ARROWS_BITS:0] arrow;
 output correctHit;
 output incorrectHit;
-
+output partialArrow;
 
 
 //set up async presses
@@ -115,103 +115,111 @@ reg incorrectHit_reg = 0;
 always @(posedge clk) begin
     //reset correctHit_reg && incorrectHit_reg on posedge metronome_clk
     if(is_posedge_metronome_clk) begin
-        correctHit_reg <= 0;
-        incorrectHit_reg <= 0;
+        correctHit_reg = 0;
+        incorrectHit_reg = 0;
 		keysPressed = ARROW_NONE;
+        hasPressedPartialArrow = 0;
     end
+    if(state == STATE_GAME) begin
+        //if user still has chance to score points on this arrow
+        if(metronome_clk && !correctHit_reg && !incorrectHit_reg) begin
+            //record key presses so far
+            //takes care of incorrect hits for impossible combinations
+            if(is_posedge_up) begin
+                case(keysPressed) 
+                    ARROW_NONE: keysPressed = ARROW_UP;
+                    ARROW_LEFT: keysPressed = ARROW_UP_LEFT;
+                    ARROW_RIGHT: keysPressed = ARROW_UP_RIGHT;
+                    ARROW_DOWN: keysPressed = ARROW_UP_DOWN;
+                    default: incorrectHit_reg = 1;
+                endcase
+            end
+            if(is_posedge_down) begin
+                case(keysPressed) 
+                    ARROW_NONE: keysPressed = ARROW_DOWN;
+                    ARROW_LEFT: keysPressed = ARROW_DOWN_LEFT;
+                    ARROW_RIGHT: keysPressed = ARROW_DOWN_RIGHT;
+                    ARROW_UP: keysPressed = ARROW_UP_DOWN;
+                    default: incorrectHit_reg = 1;
+                endcase
+            end
+            if(is_posedge_left) begin
+                case(keysPressed) 
+                    ARROW_NONE: keysPressed = ARROW_LEFT;
+                    ARROW_RIGHT: keysPressed = ARROW_LEFT_RIGHT;
+                    ARROW_UP: keysPressed = ARROW_UP_LEFT;
+                    ARROW_DOWN: keysPressed = ARROW_DOWN_LEFT;
+                    default: incorrectHit_reg = 1;
+                endcase
+            end
+            if(is_posedge_right) begin
+                case(keysPressed) 
+                    ARROW_NONE: keysPressed = ARROW_RIGHT;
+                    ARROW_LEFT: keysPressed = ARROW_LEFT_RIGHT;
+                    ARROW_UP: keysPressed = ARROW_UP_RIGHT;
+                    ARROW_DOWN: keysPressed = ARROW_DOWN_RIGHT;
+                    default: incorrectHit_reg = 1;
+                endcase
+            end
 
-    //if user still has chance to score points on this arrow
-    if(metronome_clk && !correctHit_reg && !incorrectHit_reg) begin
-        //record key presses so far
-        //takes care of incorrect hits for impossible combinations
-        if(is_posedge_up) begin
-            case(keysPressed) 
-                ARROW_NONE: keysPressed = ARROW_UP;
-                ARROW_LEFT: keysPressed = ARROW_UP_LEFT;
-                ARROW_RIGHT: keysPressed = ARROW_UP_RIGHT;
-                ARROW_DOWN: keysPressed = ARROW_UP_DOWN;
-                default: incorrectHit_reg <= 0;
-            endcase
-        end
-        if(is_posedge_down) begin
-            case(keysPressed) 
-                ARROW_NONE: keysPressed = ARROW_DOWN;
-                ARROW_LEFT: keysPressed = ARROW_DOWN_LEFT;
-                ARROW_RIGHT: keysPressed = ARROW_DOWN_RIGHT;
-                ARROW_UP: keysPressed = ARROW_UP_DOWN;
-                default: incorrectHit_reg <= 0;
-            endcase
-        end
-        if(is_posedge_left) begin
-            case(keysPressed) 
-                ARROW_NONE: keysPressed = ARROW_LEFT;
-                ARROW_RIGHT: keysPressed = ARROW_LEFT_RIGHT;
-                ARROW_UP: keysPressed = ARROW_UP_LEFT;
-                ARROW_DOWN: keysPressed = ARROW_DOWN_LEFT;
-                default: incorrectHit_reg <= 0;
-            endcase
-        end
-        if(is_posedge_right) begin
-            case(keysPressed) 
-                ARROW_NONE: keysPressed = ARROW_RIGHT;
-                ARROW_LEFT: keysPressed = ARROW_LEFT_RIGHT;
-                ARROW_UP: keysPressed = ARROW_UP_RIGHT;
-                ARROW_DOWN: keysPressed = ARROW_DOWN_RIGHT;
-                default: incorrectHit_reg <= 0;
-            endcase
-        end
+            //check if user has pressed arrows to score points
+            //only need to check if user has pressed something
+            //TODO: decide if we are going to give points for empty arrow
+            if(keysPressed == arrow) begin 
+                correctHit_reg = 1;
+                hasPressedPartialArrow = 0;
+            end
+            else if(keysPressed != ARROW_NONE) begin
+                case(arrow) 
+                    ARROW_UP_DOWN: begin
+                        hasPressedPartialArrow = (keysPressed == ARROW_UP || keysPressed == ARROW_DOWN);
+                    end
+                    ARROW_UP_LEFT: begin
+                        hasPressedPartialArrow = (keysPressed == ARROW_UP || keysPressed == ARROW_LEFT);
+                    end
+                    ARROW_UP_RIGHT: begin
+                        hasPressedPartialArrow = (keysPressed == ARROW_UP || keysPressed == ARROW_RIGHT); 
+                    end
+                    ARROW_DOWN_LEFT: begin
+                        hasPressedPartialArrow = (keysPressed == ARROW_DOWN || keysPressed == ARROW_LEFT); 
+                    end
+                    ARROW_DOWN_RIGHT: begin
+                        hasPressedPartialArrow = (keysPressed == ARROW_DOWN || keysPressed == ARROW_RIGHT); 
+                    end
+                    ARROW_LEFT_RIGHT: begin
+                        hasPressedPartialArrow = (keysPressed == ARROW_LEFT || keysPressed == ARROW_RIGHT); 
+                    end
+                    default:
+                        hasPressedPartialArrow = 0;
+                endcase
 
-        //check if user has pressed arrows to score points
-        //only need to check if user has pressed something
-        //TODO: decide if we are going to give points for empty arrow
-        if(keysPressed == arrow) begin 
-            correctHit_reg <= 1;
-            hasPressedPartialArrow <= 0;
+                //at this point, all correct combinations have been filtered out, if
+                //user has *partially* pressed a correct combination, it will have 
+                //been marked with "hasPressedPartialArrow" (NOTE: this only applies
+                //for double arrow combinations.
+                
+                //NOTE: we also know that the user has pressed something already
+
+                //check for incorrect combinations
+                if(!hasPressedPartialArrow && !correctHit_reg)
+                    incorrectHit_reg = 1;
+
+            end //end else if(keysPressed != ARROW_NONE) 
+        end //end if user has chance to score points
+        else if(!metronome_clk) begin
+            //if user has pressed keys here, it is automatically an incorrect hit.
+            if(is_posedge_up || is_posedge_down || is_posedge_left || is_posedge_right) begin
+                incorrectHit_reg = 1;
+            end
+            // if user has not made a correct hit yet, they missed the arrow.
+            if(!incorrectHit_reg && !correctHit_reg) begin
+                incorrectHit_reg = 1;
+            end
         end
-        else if(keysPressed != ARROW_NONE) begin
-            case(arrow) 
-                ARROW_UP_DOWN: begin
-                    hasPressedPartialArrow <= (keysPressed == ARROW_UP || keysPressed == ARROW_DOWN);
-                end
-                ARROW_UP_LEFT: begin
-                    hasPressedPartialArrow <= (keysPressed == ARROW_UP || keysPressed == ARROW_LEFT);
-                end
-                ARROW_UP_RIGHT: begin
-                    hasPressedPartialArrow <= (keysPressed == ARROW_UP || keysPressed == ARROW_RIGHT); 
-                end
-                ARROW_DOWN_LEFT: begin
-                    hasPressedPartialArrow <= (keysPressed == ARROW_DOWN || keysPressed == ARROW_LEFT); 
-                end
-                ARROW_DOWN_RIGHT: begin
-                    hasPressedPartialArrow <= (keysPressed == ARROW_DOWN || keysPressed == ARROW_RIGHT); 
-                end
-                ARROW_LEFT_RIGHT: begin
-                    hasPressedPartialArrow <= (keysPressed == ARROW_LEFT || keysPressed == ARROW_RIGHT); 
-                end
-            endcase
-
-            //at this point, all correct combinations have been filtered out, if
-            //user has *partially* pressed a correct combination, it will have 
-            //been marked with "hasPressedPartialArrow" (NOTE: this only applies
-            //for double arrow combinations.
-            
-            //NOTE: we also know that the user has pressed something already
-
-            //check for incorrect combinations
-            if(!hasPressedPartialArrow && !correctHit_reg)
-                incorrectHit_reg <= 1;
-
-        end //end else if(keysPressed != ARROW_NONE) 
-    end //end if user has chance to score points
-    else if(!metronome_clk) begin
-        //if user has pressed keys here, it is automatically an incorrect hit.
-        if(is_posedge_up || is_posedge_down || is_posedge_left || is_posedge_right) begin
-            incorrectHit_reg <= 1;
-        end
-    end
+    end //end if game_mode
 end
 
 assign correctHit = correctHit_reg;
 assign incorrectHit = incorrectHit_reg;
-
+assign partialArrow = hasPressedPartialArrow;
 endmodule

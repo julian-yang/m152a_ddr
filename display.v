@@ -6,12 +6,15 @@ module display
 	// outputs
 	seg, an,
 	// inputs
-	clk, metronome_clk, state, cur_arrows, score, comboCount, combo_enable);
+	clk, metronome_clk, state, cur_arrow0, cur_arrow1, cur_arrow2, cur_arrow3, score, comboCount, combo_enable);
 	
 input clk;
 input metronome_clk;
 input [STATE_BITS:0] state;
-input [NUM_ARROWS_BITS:0] cur_arrows [3:0];
+input [NUM_ARROWS_BITS:0] cur_arrow3;
+input [NUM_ARROWS_BITS:0] cur_arrow2;
+input [NUM_ARROWS_BITS:0] cur_arrow1;
+input [NUM_ARROWS_BITS:0] cur_arrow0;
 input [13:0] score;
 input [13:0] comboCount;
 input combo_enable;
@@ -48,10 +51,10 @@ always @(posedge clk) begin
             if(is_posedge_metronome_clk) begin
                 // assign arrows to num's
                 
-                num3 = cur_arrows[3]; //this is the one that the user should be pressing
-                num2 = cur_arrows[2];
-                num1 = cur_arrows[1];
-                num0 = cur_arrows[0];
+                num3 = cur_arrow3; //this is the one that the user should be pressing
+                num2 = cur_arrow2;
+                num1 = cur_arrow1;
+                num0 = cur_arrow0;
             end
         end
         STATE_PAUSE:
