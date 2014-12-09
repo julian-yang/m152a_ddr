@@ -58,7 +58,7 @@ random randomModule(.clk(oneHz), .sw(sw[7:1]), .random_num(randomNum), .random_a
 //score scoreModule (.clk(clk), .oneHz_CLK(oneHz), .twoHz_CLK(twoHz), .blink_CLK(blink), .state(state), .num0(num0), .num1(num1), .num2(num2), .num3(num3), .isBlink(isBlink));
 arrow arrowModule(.clk(oneHz), .next_arrow(randomArrow), .cur_arrows(curArrows));
 display displayModule (.seg(seg), .an(an), .clk(display), .metronome_clk(oneHz), .state(state),  .cur_arrows(curArrows), .score(score), .comboCount(comboCount), .combo_enable(combo_en));
-collision collisionModule(.clk(clk), .metronome_clk(twoHz), .btnU(btnU), .btnD(btnD), .btnL(btnL), .btnR(btnR), .arrow(curArrows[3]), .correctHit(correctHit), .incorrectHit(incorrectHit));
+collision collisionModule(.clk(clk), .metronome_clk(oneHz), .btnU(btnU), .btnD(btnD), .btnL(btnL), .btnR(btnR), .arrow(curArrows[3]), .correctHit(correctHit), .incorrectHit(incorrectHit));
 //assign randomArrow = 15;
 assign score = randomNum;
 assign comboCount = 24;
