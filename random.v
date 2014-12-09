@@ -47,7 +47,7 @@ begin
         random_reg <= 1523;
     else begin
         //generate new number
-        newBit <= random_num[RANDOM_BITS] + random_reg[1] + 1;
+        newBit <= random_num[RANDOM_BITS] + random_reg[RANDOM_BITS-1] + 1;
         random_reg <= {newBit, random_reg[RANDOM_BITS:1]};
 
         //shift over new number in our number trackers

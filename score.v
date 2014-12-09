@@ -27,7 +27,7 @@ reg [3:0] reg_num3;
 reg is_paused = 0;
 
 always @(posedge clk) begin
-
+    //figure out what the current multiplier should be.
     if (correctHit) begin
         if (combos >= 15)
             multiplier = 8;
@@ -39,6 +39,7 @@ always @(posedge clk) begin
             multiplier = 1;
     end
     
+    //reset multiplier for incorrect hits
     if (incorrectHit) begin
         multiplier = 1;   
         combos = 0;
