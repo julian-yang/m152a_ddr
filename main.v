@@ -38,8 +38,6 @@ output [6:0] seg;
 output [3:0] an;
 reg reset;
 wire oneHz;
-wire twoHz;
-wire fourHz; //4Hz
 wire display;
 wire combo_en;
 wire [13:0] score;
@@ -57,7 +55,7 @@ wire incorrectHit;
 wire [3:0] multiplier;
 wire partialArrow;
 
-clock clkModule ( .clk(clk), .state(state), .twoHz_CLK(twoHz), .oneHz_CLK(oneHz), .fourHz_CLK(fourHz), .display_CLK(display));
+clock clkModule ( .clk(clk), .state(state), .oneHz_CLK(oneHz), .display_CLK(display));
 stateGenerator stateModule (.output_state(state), .display_combo_en(combo_en), .clk(clk), .pauseSwitch(sw[0]), .btnR(btnR), .btnL(btnL));
 random randomModule(.clk(oneHz), .sw(sw[7:1]), .random_num(randomNum), .random_arrow(randomArrow), .state(state));
 score scoreModule (.clk(clk), .state(state), .multiplier(multiplier), .comboCount(comboCount), .score(score), .correctHit(correctHit), .incorrectHit(incorrectHit));
